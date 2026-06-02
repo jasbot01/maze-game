@@ -152,6 +152,7 @@ class Robot(pygame.sprite.Sprite):
             topleft=(self.col * TILE_SIZE, self.row * TILE_SIZE)
         )
 
+
     def _load_image(self) -> pygame.Surface:
         """Load the robot image, or create a fallback placeholder.
 
@@ -170,6 +171,23 @@ class Robot(pygame.sprite.Sprite):
 
         return surface
 
+
+    def move_to(self, row: int, col: int) -> None:
+        """Move the robot to a new grid position.
+
+        Args:
+            row: The robot's new row.
+            col: The robot's new column.
+        """
+        # Update the robot's logical grid position.
+        self.row = row
+        self.col = col
+
+        # Update the robot's pixel position so Pygame draws it in the right spot.
+        self.rect.topleft = (
+            self.col * TILE_SIZE,
+            self.row * TILE_SIZE
+        )
 
 #-------------------------------------------------------------------------------
 
@@ -286,6 +304,49 @@ def setup_game_window() -> pygame.Surface:
     return screen
 
 
+def get_move_direction(key: int) -> tuple[int, int] | None:
+    """Convert a keyboard key into a row/column movement direction.
+
+    Args:
+        key: The Pygame key constant from a KEYDOWN event.
+
+    Returns:
+        A tuple of (row_change, col_change), or None if the key is not movement.
+    """
+    if key in (pygame.K_UP, pygame.K_w):
+        return (-1, 0)
+
+    if key in (pygame.K_DOWN, pygame.K_s):
+        return (1, 0)
+
+    if key in (pygame.K_LEFT, pygame.K_a):
+        return (0, -1)
+
+    if key in (pygame.K_RIGHT, pygame.K_d):
+        return (0, 1)
+
+    return None
+
+
+def can_move_to(level: list[list[int]], row: int, col: int) -> bool:
+    """Check whether the robot can move to a tile.
+
+    Args:
+        level: A 2D list containing tile type IDs.
+        row: The target row.
+        col: The target column.
+
+    Returns:
+        True if the target tile is inside the map and not a wall.
+    """
+    is_inside_level = 0 <= row < len(level) and 0 <= col < len(level[0])
+
+    if not is_inside_level:
+        return False
+
+    return level[row][col] != WALL
+
+
 #-------------------------------------------------------------------------------
 
 
@@ -325,6 +386,18 @@ def main() -> None:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     _game_is_running = False
+
+                else:
+                    direction = get_move_direction(event.key)
+
+                    if direction is not None:
+                        row_change, col_change = direction
+
+                        next_row = robot.row + row_change
+                        next_col = robot.col + col_change
+
+                        if can_move_to(LEVEL, next_row, next_col):
+                            robot.move_to(next_row, next_col)
 
         # Clear the actual window.
         screen.fill((18, 23, 34))
