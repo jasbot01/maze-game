@@ -5,37 +5,21 @@ and start the main game loop.
 """
 
 import sys
-from pathlib import Path
 
 import pygame
 
-## Do these later ##
-# from tile import Tile
-# from player import Player
-
-
-## Basic settings
-
-# Size of each tile in the actual game/grid logic.
-# Adjust so tile img becomes clearer
-TILE_SIZE = 250
-
-# Size of the actual window shown to the player.
-WINDOW_WIDTH = 960
-WINDOW_HEIGHT = 720
-WINDOW_TITLE = "RescueBot: Low Power"
-
-FPS = 60
-
-PROJECT_ROOT = Path(__file__).resolve().parent
-ASSET_DIR = PROJECT_ROOT / "assets"
-
-
-# Tile types
-FLOOR = 0
-WALL = 1
-CHARGER = 2
-ROBOT_START = 3
+from game.settings import (
+    FLOOR,
+    FPS,
+    ROBOT_START,
+    TILE_SIZE,
+    WALL,
+    WINDOW_HEIGHT,
+    WINDOW_TITLE,
+    WINDOW_WIDTH,
+)
+from game.robot import Robot
+from game.tile import Tile
 
 
 # Simple hardcoded test map
@@ -47,147 +31,6 @@ LEVEL = [
     [1, 1, 1, 1, 1, 1, 1, 1],
 ]
 
-
-# Temporary fallback colors if image files do not exist yet
-COLORS = {
-    FLOOR: (225, 220, 205),
-    WALL: (60, 68, 84),
-    CHARGER: (80, 220, 140),
-}
-
-
-# Optional image filenames for each tile type
-TILE_IMAGES = {
-    FLOOR: "magenta_tile.png",
-    WALL: "pink_blob.png",
-    CHARGER: "charger.png",
-}
-
-
-#-------------------------------------------------------------------------------
-
-class Tile(pygame.sprite.Sprite):
-    """One tile on the maze grid.
-
-    A Tile is a visible square on the map, such as a floor tile, wall tile,
-    or charging station tile.
-    """
-
-    def __init__(self, tile_type: int, row: int, col: int) -> None:
-        """Create a tile at a specific grid position.
-
-        Args:
-            tile_type: The kind of tile, such as FLOOR, WALL, or CHARGER.
-            row: The tile's row in the level grid.
-            col: The tile's column in the level grid.
-        """
-        super().__init__()
-
-        # Store the logical tile type so we can check it later.
-        self.tile_type = tile_type
-
-        # Store the tile's grid position.
-        self.row = row
-        self.col = col
-
-        # Load the tile image, or create a fallback colored square.
-        self.image = self._load_image()
-
-        # Pygame uses rect to know where to draw the sprite.
-        self.rect = self.image.get_rect(
-            topleft=(self.col * TILE_SIZE, self.row * TILE_SIZE)
-        )
-
-    def _load_image(self) -> pygame.Surface:
-        """Load this tile's image, or create a simple fallback surface.
-
-        Returns:
-            A Pygame Surface used as this tile's visual image.
-        """
-        image_name = TILE_IMAGES[self.tile_type]
-        image_path = ASSET_DIR / image_name
-
-        # If the image exists, use it.
-        if image_path.exists():
-            image = pygame.image.load(image_path).convert_alpha()
-            return pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
-
-        # Otherwise, create a temporary placeholder square.
-        surface = pygame.Surface((TILE_SIZE, TILE_SIZE))
-        surface.fill(COLORS[self.tile_type])
-
-        # Draw a thin border so the grid is visible.
-        pygame.draw.rect(surface, (140, 145, 155), surface.get_rect(), width=1)
-
-        return surface
-
-
-#-------------------------------------------------------------------------------
-
-class Robot(pygame.sprite.Sprite):
-    """The player-controlled robot.
-
-    The robot is separate from the tilemap because it will eventually move,
-    while floor/wall/charger tiles stay in fixed positions.
-    """
-
-    def __init__(self, row: int, col: int) -> None:
-        """Create the robot at a specific grid position.
-
-        Args:
-            row: The robot's starting row in the level grid.
-            col: The robot's starting column in the level grid.
-        """
-        super().__init__()
-
-        # Store the robot's current grid position.
-        self.row = row
-        self.col = col
-
-        # Load the robot image from assets/robot.png.
-        self.image = self._load_image()
-
-        # Position the robot sprite on top of its starting tile.
-        self.rect = self.image.get_rect(
-            topleft=(self.col * TILE_SIZE, self.row * TILE_SIZE)
-        )
-
-
-    def _load_image(self) -> pygame.Surface:
-        """Load the robot image, or create a fallback placeholder.
-
-        Returns:
-            A Pygame Surface used as the robot sprite image.
-        """
-        image_path = ASSET_DIR / "robot.png"
-
-        if image_path.exists():
-            image = pygame.image.load(image_path).convert_alpha()
-            return pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
-
-        surface = pygame.Surface((TILE_SIZE, TILE_SIZE), pygame.SRCALPHA)
-        surface.fill((72, 160, 255))
-        pygame.draw.rect(surface, (245, 247, 250), surface.get_rect(), width=2)
-
-        return surface
-
-
-    def move_to(self, row: int, col: int) -> None:
-        """Move the robot to a new grid position.
-
-        Args:
-            row: The robot's new row.
-            col: The robot's new column.
-        """
-        # Update the robot's logical grid position.
-        self.row = row
-        self.col = col
-
-        # Update the robot's pixel position so Pygame draws it in the right spot.
-        self.rect.topleft = (
-            self.col * TILE_SIZE,
-            self.row * TILE_SIZE
-        )
 
 #-------------------------------------------------------------------------------
 
