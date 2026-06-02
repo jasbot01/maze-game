@@ -17,7 +17,8 @@ import pygame
 ## Basic settings
 
 # Size of each tile in the actual game/grid logic.
-TILE_SIZE = 48
+# Adjust so tile img becomes clearer
+TILE_SIZE = 250
 
 # Size of the actual window shown to the player.
 WINDOW_WIDTH = 960
@@ -57,8 +58,8 @@ COLORS = {
 
 # Optional image filenames for each tile type
 TILE_IMAGES = {
-    FLOOR: "floor.png",
-    WALL: "wall.png",
+    FLOOR: "magenta_tile.png",
+    WALL: "pink_blob.png",
     CHARGER: "charger.png",
 }
 
@@ -345,6 +346,12 @@ def main() -> None:
             level_surface,
             scaled_level_rect.size
         )
+
+        #scaled_level_surface = pygame.transform.scale_by(
+        #level_surface,
+        #scaled_level_rect.width // level_surface.get_width()
+        #)
+
 
         # Draw the scaled maze surface onto the centered position in the window.
         screen.blit(scaled_level_surface, scaled_level_rect)
