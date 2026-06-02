@@ -2,7 +2,7 @@
 
 import pygame
 
-from game.settings import FLOOR, ROBOT_START, TILE_SIZE, WALL
+from game.settings import CHARGER, FLOOR, ROBOT_START, TILE_SIZE, WALL
 from game.tile import Tile
 
 
@@ -123,3 +123,17 @@ def can_move_to(level: list[list[int]], row: int, col: int) -> bool:
         return False
 
     return level[row][col] != WALL
+
+
+def is_charger(level: list[list[int]], row: int, col: int) -> bool:
+    """Check whether a tile is the charging station.
+
+    Args:
+        level: A 2D list containing tile type IDs.
+        row: The row to check.
+        col: The column to check.
+
+    Returns:
+        True if the tile is the charging station.
+    """
+    return level[row][col] == CHARGER

@@ -15,6 +15,7 @@ from game.level import (
     find_tile,
     get_level_size,
     get_scaled_level_rect,
+    is_charger,
 )
 from game.robot import Robot
 from game.settings import (
@@ -75,6 +76,27 @@ def get_move_direction(key: int) -> tuple[int, int] | None:
     return None
 
 
+def draw_centered_message(screen: pygame.Surface, message: str) -> None:
+    """Draw a centered message over the game window.
+
+    Args:
+        screen: The actual game window surface.
+        message: The message to display.
+    """
+    font = pygame.font.Font(None, 42)
+    text_surface = font.render(message, True, (245, 247, 250))
+
+    box_rect = text_surface.get_rect()
+    box_rect.inflate_ip(40, 24)
+    box_rect.center = screen.get_rect().center
+
+    pygame.draw.rect(screen, (18, 23, 34), box_rect, border_radius=12)
+    pygame.draw.rect(screen, (75, 210, 135), box_rect, width=2, border_radius=12)
+
+    text_rect = text_surface.get_rect(center=box_rect.center)
+    screen.blit(text_surface, text_rect)
+
+
 #-------------------------------------------------------------------------------
 
 
@@ -100,17 +122,27 @@ def main() -> None:
     # Create one robot sprite.
     robot = Robot(robot_row, robot_col)
 
+    # Track whether the player has reached the charging station.
+    has_won = False
+
+    # Track whether the game loop is currently running.
     _game_is_running = True
 
     while _game_is_running:
         # Process window/input events.
         for event in pygame.event.get():
+
             if event.type == pygame.QUIT:
                 _game_is_running = False
 
             elif event.type == pygame.KEYDOWN:
+
                 if event.key == pygame.K_ESCAPE:
                     _game_is_running = False
+
+                elif event.key == pygame.K_r:
+                    robot.move_to(robot_row, robot_col)
+                    has_won = False
 
                 else:
                     direction = get_move_direction(event.key)
@@ -121,8 +153,11 @@ def main() -> None:
                         next_row = robot.row + row_change
                         next_col = robot.col + col_change
 
-                        if can_move_to(LEVEL, next_row, next_col):
+                        if not has_won and can_move_to(LEVEL, next_row, next_col):
                             robot.move_to(next_row, next_col)
+
+                            if is_charger(LEVEL, robot.row, robot.col):
+                                has_won = True
 
         # Clear the actual window.
         screen.fill((18, 23, 34))
@@ -152,6 +187,10 @@ def main() -> None:
 
         # Draw the scaled maze surface onto the centered position in the window.
         screen.blit(scaled_level_surface, scaled_level_rect)
+
+        # Draw the win message over the maze after the player reaches the charger.
+        if has_won:
+            draw_centered_message(screen, "Charging station reached! Press R to restart.")
 
         # Show the completed frame.
         pygame.display.flip()
