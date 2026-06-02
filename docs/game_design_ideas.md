@@ -10,6 +10,10 @@ AI Rescue Bot / Robot Navigator
   - Robot reaches charging station before power hits 0.
   - Grid-based game.
 
+Charging station is the level's end.
+
+Pick-ups throughout the map are batteries.
+
 
 # Needs
 

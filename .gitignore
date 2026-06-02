@@ -1,3 +1,9 @@
+# Custom patterns
+.examples/
+.vscode/
+.backups/
+
+
 # Virtual environments
 .venv/
 venv/
