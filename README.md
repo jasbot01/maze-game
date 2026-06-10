@@ -1,4 +1,4 @@
-# Ohmward
+# Panic Power Maze
 
 > Working title. The final theme/name may change.
 > Alternative names:
